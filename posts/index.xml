@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on StartFault</title>
+    <link>http://localhost:1313/posts/</link>
+    <description>Recent content in Posts on StartFault</description>
+    <generator>Hugo</generator>
+    <language>en-us</language>
+    <lastBuildDate>Wed, 01 Jan 2025 00:00:00 +0000</lastBuildDate>
+    <atom:link href="http://localhost:1313/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>How I lost an important VM</title>
+      <link>http://localhost:1313/posts/vm/</link>
+      <pubDate>Wed, 01 Jan 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/vm/</guid>
+      <description>&lt;p&gt;&lt;em&gt;I write this almost a year after the fact reconstructing events from memory and notes. Some of what I write will likely be incorrect, especially when it&amp;rsquo;s about the technology we used.&lt;/em&gt;&#xA;At some point I used to be a server administrator of a student team at my university. This server old and had been toyed on by so many people, that is was ready to fall apart. The hardware was getting close to 10 years old, and it gave us a lot of trouble. Sometimes due to lack of storage space or disks with write errors, but also enough times from my efforts to move to a new system. During the first couple weeks already, a misconfiguration of &lt;a href=&#34;https://www.dovecot.org/&#34;&gt;Dovecot&lt;/a&gt; caused all of management&amp;rsquo;s mailboxes to be hidden from them. On the same VM running Dovecot, the website and our &lt;a href=&#34;https://www.dokuwiki.org/dokuwiki&#34;&gt;dokuwiki&lt;/a&gt; was also located. There once was a backup for it, but because the backup server was out of space, it had stopped working. So I decided to make a manual backup. A great task for a Monday evening at 5 pm right?&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Shader coding the Ockham logo</title>
+      <link>http://localhost:1313/posts/shader_logo/</link>
+      <pubDate>Wed, 01 Jan 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/shader_logo/</guid>
+      <description>&lt;h1 id=&#34;introduction&#34;&gt;Introduction&lt;/h1&gt;&#xA;&lt;p&gt;This is a breakdown of the Ockham logo painted with math, using a shader. What is a shader you might ask? For the purpose of this demo you can consider a shader a function, running on the GPU, that tells each pixel what color they should have, based on their location. So:&lt;/p&gt;&#xA;&lt;p&gt;$$&#xA;color = Shader(x,y)&#xA;$$&lt;/p&gt;&#xA;&lt;p&gt;Where x, y are the x and y coordinate of the pixel and ‘color’ is the color of the pixel as an R,G,B vector. The components of this vector will have values between 0 and 1 instead of 0 and 255. I’ll be using the website shadertoy to code and display the shader.&lt;/p&gt;</description>
+    </item>
+    <item>
+      <title>Timestamp magic</title>
+      <link>http://localhost:1313/posts/timestamp_magic/neat-magic-with-timestamps/</link>
+      <pubDate>Wed, 01 Jan 2025 00:00:00 +0000</pubDate>
+      <guid>http://localhost:1313/posts/timestamp_magic/neat-magic-with-timestamps/</guid>
+      <description>&lt;p&gt;This week, I saw a git commit that contained a very neatly written function. I will not go into detail of the system as it doesn&amp;rsquo;t matter much for the problem.  The situation is the following:&#xA;We receive variables: &lt;code&gt;cur&lt;/code&gt;, the number of ms since the start of last minute according to the system time, and the number of ms since the start or last minute according to the packet source. It is likely that the packet timestamp is more accurate, so we want to figure out if this timestamp was sampled in the previous, current or next minute. This is what this function calculates.&#xA;Here it is in all it&amp;rsquo;s glory:&lt;/p&gt;</description>
+    </item>
+  </channel>
+</rss>

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en-us"><head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <meta name="description" content="Introduction
+This is a breakdown of the Ockham logo painted with math, using a shader. What is a shader you might ask? For the purpose of this demo you can consider a shader a function, running on the GPU, that tells each pixel what color they should have, based on their location. So:
+$$
+color = Shader(x,y)
+$$
+Where x, y are the x and y coordinate of the pixel and ‘color’ is the color of the pixel as an R,G,B vector. The components of this vector will have values between 0 and 1 instead of 0 and 255. I’ll be using the website shadertoy to code and display the shader.">  
+
+  <title>
+    
+      Shader coding the Ockham logo
+    
+  </title>
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/" />
+  
+  
+  
+  <link rel="stylesheet" href="/css/main.900100e9dbee2d56c58fac8bb717037cae7e26a9c36c29d2ff587bdd65f0cbbe510b41d81a3bb234919cdfdc7550d786b2fab70c8fc507772d732fe097106d12.css" integrity="sha512-kAEA6dvuLVbFj6yLtxcDfK5&#43;JqnDbCnS/1h73WXwy75RC0HYGjuyNJGc39x1UNeGsvq3DI/FB3ctcy/glxBtEg==" />
+  
+</head>
+<body a="auto">
+        <main class="page-content" aria-label="Content">
+            <div class="w">
+                <div class="post-meta">
+                    <a href="/">..</a>
+
+                    <p>
+                        <time datetime="2025-01-01 00:00:00 &#43;0000 UTC">
+                            2025-01-01
+                        </time>
+                    </p>
+                </div>
+
+<article>
+    <h1>Shader coding the Ockham logo</h1>
+
+    
+
+    <h1 id="introduction">Introduction</h1>
+<p>This is a breakdown of the Ockham logo painted with math, using a shader. What is a shader you might ask? For the purpose of this demo you can consider a shader a function, running on the GPU, that tells each pixel what color they should have, based on their location. So:</p>
+<p>$$
+color = Shader(x,y)
+$$</p>
+<p>Where x, y are the x and y coordinate of the pixel and ‘color’ is the color of the pixel as an R,G,B vector. The components of this vector will have values between 0 and 1 instead of 0 and 255. I’ll be using the website shadertoy to code and display the shader.</p>
+<p>If you want to skip to the end result, here is the demo on shadertoy:<a href="https://www.shadertoy.com/view/4f3GWX">https://www.shadertoy.com/view/4f3GWX</a></p>
+<h2 id="getting-started">Getting started!</h2>
+<p>I’ll start with some boilerplate code and a pure white background. The boilerplate code is just something we need to make the logo display properly. It isn’t required to understand how the logo is painted. All you need to know is that after this point, uv is a 2d vector where the top left is -1,-1 and the bottom right is 1,1</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">mainImage</span>( out vec4 fragColor, in vec2 fragCoord )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//---begin boilerplate---
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// Normalized pixel coordinates (from 0 to 1)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    vec2 uv <span style="color:#f92672">=</span> fragCoord<span style="color:#f92672">/</span>iResolution.xy;
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//&#34;Squarify&#34; the space
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    uv.x <span style="color:#f92672">/=</span> iResolution.y<span style="color:#f92672">/</span>iResolution.x;
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//Pixel coordinates from -1 to 1
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    uv <span style="color:#f92672">=</span> uv<span style="color:#f92672">*</span><span style="color:#ae81ff">2.0</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1.0</span>;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//---end boilerplate---
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//White background 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    vec3 color <span style="color:#f92672">=</span> vec3(<span style="color:#ae81ff">1.0</span>,<span style="color:#ae81ff">1.0</span>,<span style="color:#ae81ff">1.0</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Output to screen
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    fragColor <span style="color:#f92672">=</span> vec4(color,<span style="color:#ae81ff">1.0</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>The first 2 components of the Ockham logo are the back border and the white circle. To paint these, I will be telling the pixels with distance 1 smaller from the center to be black, unless they have a distance smaller than 0.8, in which case they should be white. This can be expressed in the following way:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>    <span style="color:#66d9ef">float</span> distance <span style="color:#f92672">=</span> length(uv);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">float</span> black <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.0</span><span style="color:#f92672">-</span>ceil(<span style="color:#ae81ff">1.0</span><span style="color:#f92672">-</span>distance);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">float</span> white <span style="color:#f92672">=</span> max(<span style="color:#ae81ff">0.0</span>,ceil(<span style="color:#ae81ff">0.8</span><span style="color:#f92672">-</span>distance));
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">float</span> grayScale <span style="color:#f92672">=</span> clamp(black<span style="color:#f92672">+</span>white,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">1.0</span>);
+</span></span><span style="display:flex;"><span>    color <span style="color:#f92672">=</span> vec3(grayScale); <span style="color:#75715e">//vec3(x), where x is a float is shorthand for vec3(x,x,x)
+</span></span></span></code></pre></div><p>Firstly we have the distance to point 0.0, or the length of the vector. Then, we assign 2 grayscale values to the pixels. The first value, black describes the black black circle around the logo. The ceil function rounds a decimal value up (brings it to it’s “ceiling”). For example $ceil(0.1)=1$</p>
+<p>So if <code>distance</code> is more than 1, the result of <code>ceil</code> will be 1 or more, which makes black 0 or less. If <code>distance</code> is less than 1, the output of <code>ceil</code> will be 0 or less which makes black 1 or more. The result is a black circle of radius 1 on a white background.</p>
+<p>The white variable describes a white circle of radius 0.8, using the same <code>ceil</code> function. However as we add these grayscale values together in the final step. White shouldn’t go negative, as this would make the rest of the screen also go black outside the black circle. This gives us the following image:</p>
+<p><img src="Untitled.png" alt="Untitled"></p>
+<h2 id="pie-piece">Pie piece</h2>
+<p>Now we can start working on the pie chart. To create this, we can use the dot product to target only a section of the circle.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>vec2 pieAngle <span style="color:#f92672">=</span> normalize(vec2(<span style="color:#ae81ff">0.4</span>,<span style="color:#ae81ff">0.5</span>));
+</span></span><span style="display:flex;"><span>vec2 normalVector <span style="color:#f92672">=</span> normalize(uv);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">float</span> piePiece <span style="color:#f92672">=</span> max(<span style="color:#ae81ff">0.0</span>,ceil(dot(normalVector,pieAngle)<span style="color:#f92672">-</span><span style="color:#ae81ff">0.7</span>));
+</span></span><span style="display:flex;"><span>color <span style="color:#f92672">=</span> vec3(piePiece);
+</span></span></code></pre></div><p>By normalizing the pixel coordinate, have a vector that describes the angle of the vector pointing to the pixel cooridinate. Using the dot product and another normalized vector, we can color the pixels based on how similair their angle is to that of the vector we picked. The result seems what we are looking for:</p>
+<p><img src="Untitled%201.png" alt="Untitled"></p>
+<p>After some hacking around, I came up with the following code:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>    vec2 pieAngle <span style="color:#f92672">=</span> normalize(vec2(<span style="color:#ae81ff">0.4</span>,<span style="color:#ae81ff">0.5</span>));
+</span></span><span style="display:flex;"><span>    vec2 normalVector <span style="color:#f92672">=</span> normalize(uv);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">float</span> piePiece <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.0</span><span style="color:#f92672">-</span>max(<span style="color:#ae81ff">0.0</span>,ceil(dot(normalVector,pieAngle)<span style="color:#f92672">-</span><span style="color:#ae81ff">0.7</span>));
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//If the color is black, paint it red.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    vec3 coloredPie <span style="color:#f92672">=</span> max(vec3(piePiece),vec3(<span style="color:#ae81ff">1.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>));
+</span></span></code></pre></div><p>And with some minor modifications to our initial 2 circle code.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>      vec3 pie <span style="color:#f92672">=</span> vec3(max(<span style="color:#ae81ff">0.0</span>,ceil(<span style="color:#ae81ff">0.8</span><span style="color:#f92672">-</span>distance)))<span style="color:#f92672">*</span>coloredPie;
+</span></span><span style="display:flex;"><span>    vec3 combined <span style="color:#f92672">=</span> clamp(black<span style="color:#f92672">+</span>white,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">1.0</span>);
+</span></span></code></pre></div><p>We get the following:</p>
+<p><img src="Untitled%202.png" alt="Untitled"></p>
+<p>Nice!</p>
+<p><img src="Untitled.jpeg" alt="Untitled"></p>
+<p>Now we just have 2 components to go: the border of the pie, and the small semi-circle in the middel.</p>
+<h2 id="pie-piece-border">Pie piece border</h2>
+<p>Naïvely, I assumed I could just use another pie piece and put it behind the other pie. However that unfortunately did not give do what I expected it to:</p>
+<p><img src="Untitled%203.png" alt="Untitled"></p>
+<p>The next best thing I can think of is to use the distance function for a line piece. Just like we made a couple circles by measuring the distance to the origin, we can create other objects aswell using more complex distance functions.</p>
+<p>This is the formula for the distance to a line from the origin to some point b, at some position p. I modified this from the distance function provided by inigo iquillez. You can find his blog with a big collection of 2D distance functions. <a href="https://iquilezles.org/articles/distfunctions2d/">https://iquilezles.org/articles/distfunctions2d/</a></p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">float</span> <span style="color:#a6e22e">line</span>(vec2 p, vec2 b){
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">float</span> h <span style="color:#f92672">=</span> clamp( dot(p,b)<span style="color:#f92672">/</span>dot(b,b), <span style="color:#ae81ff">0.0</span>, <span style="color:#ae81ff">1.0</span> );
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> length( p <span style="color:#f92672">-</span> b<span style="color:#f92672">*</span>h );
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Why this function works to compute the distance to a linepiece is left as an exercise to the reader.</p>
+<p>Adding these lines at the end,</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>    <span style="color:#66d9ef">float</span> piePieceBorder1 <span style="color:#f92672">=</span> min(<span style="color:#ae81ff">1.0</span>, ceil(line(uv,vec2(<span style="color:#f92672">-</span><span style="color:#ae81ff">0.1</span>,<span style="color:#ae81ff">0.9</span>))<span style="color:#f92672">-</span><span style="color:#ae81ff">0.05</span>));
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">float</span> piePieceBorder2 <span style="color:#f92672">=</span> min(<span style="color:#ae81ff">1.0</span>, ceil(line(uv,vec2(<span style="color:#ae81ff">0.9</span>,<span style="color:#ae81ff">0.1</span>))<span style="color:#f92672">-</span><span style="color:#ae81ff">0.05</span>));
+</span></span><span style="display:flex;"><span>    color <span style="color:#f92672">*=</span> piePieceBorder1<span style="color:#f92672">*</span>piePieceBorder2;
+</span></span></code></pre></div><p>Results in:</p>
+<p><img src="Untitled%204.png" alt="Untitled"></p>
+<p>The final component to add is the black semi circle in the middel of the pie chart. To add this, we just need to set the part of the pie piece which is a certain distance from the circle, to 0. To do this, only a small modification to our original pie piece is needed to do this.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span>    vec3 piePieceColor <span style="color:#f92672">=</span>  vec3(<span style="color:#ae81ff">1.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>)<span style="color:#f92672">*</span>max(<span style="color:#ae81ff">0.0</span>,(ceil(distance<span style="color:#f92672">-</span><span style="color:#ae81ff">0.45</span>)));
+</span></span><span style="display:flex;"><span>    vec3 coloredPiePiece <span style="color:#f92672">=</span> max(vec3(piePieceBody),piePieceColor);
+</span></span></code></pre></div><h2 id="end-result">End result</h2>
+<p>The picture on the left is the image we generated with shadertoy and the image on the right is one picked from the website. Clearly there are some discrapencies. The color red, the position of the red pie piece, it’s angle. However, nothing that couldn’t be fixed with 15 minutes of tweaking and tuning. Although I really can’t be bothered to do that : ). I am quite satisfied with how it turned out. This started as a spontanious project a bit too late into the evening and has been quite fun to work on over the past few days. I hope you enjoyed seeing what can be done by just telling a group of individual pixels what to do just as I enjoyed telling them.</p>
+<p><strong>Shader toy representation</strong>
+<img src="Untitled%205.png" alt="Untitled"></p>
+<p><strong>Actual logo</strong>
+<img src="Untitled%206.png" alt="Untitled|450"></p>
+<h3 id="final-code">Final code:</h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-cpp" data-lang="cpp"><span style="display:flex;"><span><span style="color:#66d9ef">float</span> <span style="color:#a6e22e">line</span>(vec2 p, vec2 b){
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">float</span> h <span style="color:#f92672">=</span> clamp( dot(p,b)<span style="color:#f92672">/</span>dot(b,b), <span style="color:#ae81ff">0.0</span>, <span style="color:#ae81ff">1.0</span> );
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">return</span> length( p <span style="color:#f92672">-</span> b<span style="color:#f92672">*</span>h );
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">mainImage</span>( out vec4 fragColor, in vec2 fragCoord )
+</span></span><span style="display:flex;"><span>{
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//---begin boilerplate---
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// Normalized pixel coordinates (from 0 to 1)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    vec2 uv <span style="color:#f92672">=</span> fragCoord<span style="color:#f92672">/</span>iResolution.xy;
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//&#34;Squarify&#34; the space
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">float</span> screenRatio <span style="color:#f92672">=</span> iResolution.y<span style="color:#f92672">/</span>iResolution.x;
+</span></span><span style="display:flex;"><span>    uv.x <span style="color:#f92672">/=</span> screenRatio;
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//Pixel coordinates from -1 to 1 for the y axis
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    uv.y <span style="color:#f92672">=</span> uv.y<span style="color:#f92672">*</span><span style="color:#ae81ff">2.0</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1.0</span>;
+</span></span><span style="display:flex;"><span>    uv.x <span style="color:#f92672">=</span> uv.x<span style="color:#f92672">*</span><span style="color:#ae81ff">2.0</span><span style="color:#f92672">-</span><span style="color:#ae81ff">1.0</span><span style="color:#f92672">/</span>screenRatio;
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//---end boilerplate---
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">float</span> distance <span style="color:#f92672">=</span> length(uv);
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">//White background 
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    vec3 color <span style="color:#f92672">=</span> vec3(<span style="color:#ae81ff">1.0</span>,<span style="color:#ae81ff">1.0</span>,<span style="color:#ae81ff">1.0</span>);
+</span></span><span style="display:flex;"><span>   
+</span></span><span style="display:flex;"><span>    vec2 pieAngle <span style="color:#f92672">=</span> normalize(vec2(<span style="color:#ae81ff">0.4</span>,<span style="color:#ae81ff">0.5</span>));
+</span></span><span style="display:flex;"><span>    vec2 normalVector <span style="color:#f92672">=</span> normalize(uv);
+</span></span><span style="display:flex;"><span><span style="color:#75715e">//    float piePieceBorder = 1.0-max(0.0,ceil(dot(normalVector,pieAngle)-0.6));
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">float</span> piePieceBody <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.0</span><span style="color:#f92672">-</span>max(<span style="color:#ae81ff">0.0</span>,ceil(dot(normalVector,pieAngle)<span style="color:#f92672">-</span><span style="color:#ae81ff">0.7</span>));
+</span></span><span style="display:flex;"><span>    vec3 piePieceColor <span style="color:#f92672">=</span>  vec3(<span style="color:#ae81ff">1.0</span>,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">0.0</span>)<span style="color:#f92672">*</span>max(<span style="color:#ae81ff">0.0</span>,(ceil(distance<span style="color:#f92672">-</span><span style="color:#ae81ff">0.45</span>)));
+</span></span><span style="display:flex;"><span>    vec3 coloredPiePiece <span style="color:#f92672">=</span> max(vec3(piePieceBody),piePieceColor);
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">float</span> border <span style="color:#f92672">=</span> <span style="color:#ae81ff">1.0</span><span style="color:#f92672">-</span>ceil(<span style="color:#ae81ff">1.0</span><span style="color:#f92672">-</span>distance);
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    vec3 pie <span style="color:#f92672">=</span> vec3(max(<span style="color:#ae81ff">0.0</span>,ceil(<span style="color:#ae81ff">0.85</span><span style="color:#f92672">-</span>distance)))<span style="color:#f92672">*</span>(coloredPiePiece);
+</span></span><span style="display:flex;"><span>    vec3 combined <span style="color:#f92672">=</span> clamp(border<span style="color:#f92672">+</span>pie,<span style="color:#ae81ff">0.0</span>,<span style="color:#ae81ff">1.0</span>);
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    color <span style="color:#f92672">=</span> vec3(combined);
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">float</span> piePieceBorder1 <span style="color:#f92672">=</span> min(<span style="color:#ae81ff">1.0</span>, ceil(line(uv,vec2(<span style="color:#f92672">-</span><span style="color:#ae81ff">0.1</span>,<span style="color:#ae81ff">0.9</span>))<span style="color:#f92672">-</span><span style="color:#ae81ff">0.05</span>));
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">float</span> piePieceBorder2 <span style="color:#f92672">=</span> min(<span style="color:#ae81ff">1.0</span>, ceil(line(uv,vec2(<span style="color:#ae81ff">0.9</span>,<span style="color:#ae81ff">0.1</span>))<span style="color:#f92672">-</span><span style="color:#ae81ff">0.05</span>));
+</span></span><span style="display:flex;"><span>    color <span style="color:#f92672">*=</span> piePieceBorder1<span style="color:#f92672">*</span>piePieceBorder2;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Output to screen
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    fragColor <span style="color:#f92672">=</span> vec4(color,<span style="color:#ae81ff">1.0</span>);
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div>
+</article>
+
+            </div>
+        </main>
+    </body></html>

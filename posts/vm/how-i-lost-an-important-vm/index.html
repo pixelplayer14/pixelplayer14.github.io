@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en-us"><head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <meta name="description" content="I write this almost a year after the fact reconstructing events from memory and notes. Some of what I write will likely be incorrect, especially when it&rsquo;s about the technology we used.
+At some point I used to be a server administrator of a student team at my university. This server old and had been toyed on by so many people, that is was ready to fall apart. The hardware was getting close to 10 years old, and it gave us a lot of trouble. Sometimes due to lack of storage space or disks with write errors, but also enough times from my efforts to move to a new system. During the first couple weeks already, a misconfiguration of Dovecot caused all of management&rsquo;s mailboxes to be hidden from them. On the same VM running Dovecot, the website and our dokuwiki was also located. There once was a backup for it, but because the backup server was out of space, it had stopped working. So I decided to make a manual backup. A great task for a Monday evening at 5 pm right?">  
+
+  <title>
+    
+      
+    
+  </title>
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/" />
+  
+  
+  
+  <link rel="stylesheet" href="/css/main.900100e9dbee2d56c58fac8bb717037cae7e26a9c36c29d2ff587bdd65f0cbbe510b41d81a3bb234919cdfdc7550d786b2fab70c8fc507772d732fe097106d12.css" integrity="sha512-kAEA6dvuLVbFj6yLtxcDfK5&#43;JqnDbCnS/1h73WXwy75RC0HYGjuyNJGc39x1UNeGsvq3DI/FB3ctcy/glxBtEg==" />
+  
+</head>
+<body a="auto">
+        <main class="page-content" aria-label="Content">
+            <div class="w">
+                <div class="post-meta">
+                    <a href="/">..</a>
+
+                    <p>
+                        <time datetime="0001-01-01 00:00:00 &#43;0000 UTC">
+                            0001-01-01
+                        </time>
+                    </p>
+                </div>
+
+<article>
+    <h1></h1>
+
+    
+
+    <p><em>I write this almost a year after the fact reconstructing events from memory and notes. Some of what I write will likely be incorrect, especially when it&rsquo;s about the technology we used.</em>
+At some point I used to be a server administrator of a student team at my university. This server old and had been toyed on by so many people, that is was ready to fall apart. The hardware was getting close to 10 years old, and it gave us a lot of trouble. Sometimes due to lack of storage space or disks with write errors, but also enough times from my efforts to move to a new system. During the first couple weeks already, a misconfiguration of <a href="https://www.dovecot.org/">Dovecot</a> caused all of management&rsquo;s mailboxes to be hidden from them. On the same VM running Dovecot, the website and our <a href="https://www.dokuwiki.org/dokuwiki">dokuwiki</a> was also located. There once was a backup for it, but because the backup server was out of space, it had stopped working. So I decided to make a manual backup. A great task for a Monday evening at 5 pm right?</p>
+<h1 id="an-eventful-monday-afternoon">An eventful Monday afternoon</h1>
+<p>I didn&rsquo;t want to export the couple hunder gigabytes of emails and attachemnts, so I gziped the var folder and promptly lost my connection to the server.</p>
+<p><strong>Mistake #1</strong> Forgetting the hard drives of the server were scarily full.</p>
+<p>Once a disk runs out of space, Hyper-V (The VM host we were using) will suspend the VMs on  that disk. This had happened before, and there was a simple solution: Free up some space on the hard drive from the host OS and resume the VMs. If it would have been early morning and still had a clear head and patience, I might have remembered this, and that would have been the end of it.  I, however, had neither of those things, so I diagnosed the issue as lack of space on the virtual drive. So what I decided to do instead was to expand the disk side of the VM beyond the limits of the physical hard drive.</p>
+<p><strong>Mistake #2</strong> Not respecting that a physical hard drive can be full.</p>
+<p>This could have been prevented if Hyper-V had better idiot protection and wouldn&rsquo;t allow this, but instead it said: &ldquo;Err, sorry mate, we tried to expand your drive but it only worked partially&hellip; yeah&hellip; good luck with that!&rdquo;</p>
+<p><strong>Mistake #3</strong> Trusting that software (from 1.5 decades ago!) is idiot-proof.</p>
+<p>Now, with a second pair of eyes, I finally saw that it was the physical drive that was full. Clearing some space by moving and removing some things, allowed us to start the server again. Unfortunately, the damage was done: we were greeted by the friendly terminal of <a href="https://www.busybox.net/">busybox</a>.</p>
+<h1 id="illogical-volumes">Illogical volumes</h1>
+<p>There had been problems with the virtual disk size of the server even before our year. Something regarding one disk being fixed size and needing more space. Not sure what exactly it was but the solution our predecessors had found was the logical volume manager. A framework that provides management for logical volumes. The setup was as follows: the system consisted of 2 disks. /dev/sda1 containing / and /boot and a second disk with the volume group <code>vg--webgenius-lv--var</code>. The only data we cared about was this group.
+![[Pasted image 20250116174942.png]]
+We tried mounting this second disk: it wouldn&rsquo;t mount. We tried running checkdisk and other tools on it. Some things came up, the <code>lv--root</code> partition seemed recoverable, it had a ext4 partition which chkdisk could recover a partition table for.
+But in the end, we just didn&rsquo;t understand LVM well enough to know what we could even do to get back the <code>lv--var</code> partition. For a week, I was consumed by it. There was once a time where I woke up at 3 am and couldn&rsquo;t get back to sleep for a while because I blamed myself that I had corrupted all the documentation my teammates had written over the last ~7 months. I only got back to sleep after browsing some forums with obscure Linux problems with only slight relevance to our case. From Wednesday onward, it became apparent that we wouldn&rsquo;t get out of this situation quickly. The communication team rushed to setup a temporary website for the coming period. Eventually, this led to the next mistake.</p>
+<p><strong>Mistake #4</strong>  Losing hope.</p>
+<p>Although we didn&rsquo;t book much results, there were still ideas. Still blog posts and man pages that showed new ways in which LVM can get messed up and repaired. None of them had worked for us Eventually, we asked for help from a local IT company. While they were able to help us with some windows Hyper-V matters to get some progress (don&rsquo;t remember what exactly), they also had little experience with LVM.
+And that&rsquo;s were we were for a couple weeks. Website looking crappy, documentation inaccessible, and a heavy feeling of guilt. After a couple weeks however, I started to remember some of those blog posts I had read while panicking and trying quick fixes, and a plan started to form. Remember the <code>lv-root</code> partition we were able to recover? LVM has a backup of its configuration stored in a folder located on there! So the plan was as follows:</p>
+<ul>
+<li>Resurrect <code>lv-root</code></li>
+<li>Copy the LVM config</li>
+<li>Apply it to the disks
+Extremely simple, but somehow we hadn&rsquo;t thought of it. It didn&rsquo;t work exactly as I thought, but after letting chkdisk mess with the setup a bit, I was able to send a victorious picture to our groupchat
+![[Pasted image 20250125191427.png]]</li>
+</ul>
+
+</article>
+
+            </div>
+        </main>
+    </body></html>

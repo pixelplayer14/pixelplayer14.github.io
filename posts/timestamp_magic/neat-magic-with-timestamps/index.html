@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en-us"><head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=1313&amp;path=livereload" data-no-instant defer></script>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+   <meta name="description" content="This week, I saw a git commit that contained a very neatly written function. I will not go into detail of the system as it doesn&rsquo;t matter much for the problem.  The situation is the following:
+We receive variables: cur, the number of ms since the start of last minute according to the system time, and the number of ms since the start or last minute according to the packet source. It is likely that the packet timestamp is more accurate, so we want to figure out if this timestamp was sampled in the previous, current or next minute. This is what this function calculates.
+Here it is in all it&rsquo;s glory:">  
+
+  <title>
+    
+      Timestamp magic
+    
+  </title>
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/" />
+  
+  
+  
+  <link rel="stylesheet" href="/css/main.900100e9dbee2d56c58fac8bb717037cae7e26a9c36c29d2ff587bdd65f0cbbe510b41d81a3bb234919cdfdc7550d786b2fab70c8fc507772d732fe097106d12.css" integrity="sha512-kAEA6dvuLVbFj6yLtxcDfK5&#43;JqnDbCnS/1h73WXwy75RC0HYGjuyNJGc39x1UNeGsvq3DI/FB3ctcy/glxBtEg==" />
+  
+</head>
+<body a="auto">
+        <main class="page-content" aria-label="Content">
+            <div class="w">
+                <div class="post-meta">
+                    <a href="/">..</a>
+
+                    <p>
+                        <time datetime="2025-01-01 00:00:00 &#43;0000 UTC">
+                            2025-01-01
+                        </time>
+                    </p>
+                </div>
+
+<article>
+    <h1>Timestamp magic</h1>
+
+    
+
+    <p>This week, I saw a git commit that contained a very neatly written function. I will not go into detail of the system as it doesn&rsquo;t matter much for the problem.  The situation is the following:
+We receive variables: <code>cur</code>, the number of ms since the start of last minute according to the system time, and the number of ms since the start or last minute according to the packet source. It is likely that the packet timestamp is more accurate, so we want to figure out if this timestamp was sampled in the previous, current or next minute. This is what this function calculates.
+Here it is in all it&rsquo;s glory:</p>
+<pre tabindex="0"><code>fn calc_timestamp_offset(cur: i64, pkt: i64) -&gt; i64 {    
+    // This function was _MUCH_ harder to write than I anticipated
+    // I don&#39;t know if I&#39;m just stupid or if this is actually hard to calculate,
+    // but I wrote a 115-line Python script just to help me visualise and check
+    // this function
+    // Suppose our &#39;timestamp balance&#39;, which I&#39;ll call &#39;offset&#39; from now on
+    // is 45_000 (ms)
+    // And we have a timeline; we only ever have the current minute, 1 minute
+    // before, and 1 minute after. Each &#39;-&#39; is 3 seconds
+    // |--------------------|--------------------|--------------------|
+    //       previous               current               next
+    // We take the number of milliseconds since the last full minute of our
+    // local system time. This is the parameter `cur` and is always in the current minute
+    // We also have some range around our current time, depending on the `offset`
+    // Suppose we have `cur = 0`, then our bound is 15_000 in the previous and current minute
+    // |-----&gt;--------------|*----&lt;--------------|--------------------|
+    //
+    // Suppose we have a packet timestamp at 5000 ms, we can indicate the possible locations
+    // on the timeline with question marks
+    // |-?---&gt;--------------|*?---&lt;--------------|-?------------------|
+    // Only one of these is within the range, so for this input, our output should be &#39;current&#39;
+    //
+    // If our packet had a timestamp of 55000 instead, it would look like so:
+    // |-----&gt;------------?-|*----&lt;------------?-|------------------?-|
+    // Now our output is &#39;previous&#39;
+    //
+    // Other cases arise if our current time is closer to the full minute:
+    // For a current time of 55000 and a packet time of 5000 we have the situation
+    // |-?------------------|-?-&gt;--------------*-|-?-&lt;----------------|
+    // Now our output is &#39;next&#39;
+    // Sadly, I don&#39;t actually know how to explain the logic of the function
+    // itself; I know what it does, and I know it works, but the actual logic
+    // is beyond me
+    
+    let bound = (cur - TIMESTAMP_BALANCE).rem_euclid(60_000);
+    if pkt &gt; cur &amp;&amp; cur &lt; TIMESTAMP_BALANCE &amp;&amp; bound &lt; pkt {
+        // Packet timestamp is for the previous minute
+        return -60_000;
+    } else if pkt &lt; cur &amp;&amp; cur &gt; TIMESTAMP_BALANCE &amp;&amp; bound &gt; pkt {
+        // Packet timestamp is for the next minute
+        return 60_000;
+    } else {
+        // Packet timestamp is for the current minute
+        return 0;
+    }
+}
+</code></pre><p>The first bit of the introduction is exactly right. This function feels deceptively hard to write and analyse. This is exactly a challenge I like though, so I made an attempt.</p>
+<h2 id="handwavy-proof">handwavy proof</h2>
+<p>let <code>ePkt</code> and <code>eCur</code> be the epoch timestamps of the packet and system time respectively.
+We will go through the terms of the if statement one by one to show that the result is correct.
+(<code>pkt&gt;cur</code>) If <code>pkt &gt; cur</code> then we know that <code>next</code> cannot be the correct minute because then <code>ePkt-eCur&gt;60_000</code></p>
+<p>(<code>cur&lt;balance</code>) If <code>cur&lt;balance</code>, then the lower bound (<code>bound</code>) we set for <code>ePkt</code> extends into <code>previous</code>, so this could still be the correct one. If not, we know it cannot be <code>previous</code>, so the minute must be <code>current</code> because we already eliminated <code>next</code>.</p>
+<p>(<code>bound&lt;pkt</code>) The epoch timestamp of <code>bound</code>,<code>eBound = (eCur-balance)</code>. This is the earliest timestamp that our clock can be behind by according to the value of <code>balance</code>. So if <code>pkt&lt;bound</code> , we must conclude that the minute cannot be <code>previous</code>, so the minute must be <code>current</code> because we already eliminated <code>next</code>.
+Because <code>cur&lt;balance</code>, <code>bound=60_000+(cur-balance) = cur+(60_000-balance)  We specified that </code>ePkt&lt;eCur+(60_000-balance)<code>. If </code>cur+(60_000-balance) &lt; pkt<code>, and </code>cur<code>and</code>pkt<code>are in the same minute, this condition is violated. We therefore eliminate</code>current<code>and we must conclude that the output is</code>previous`.</p>
+<p>Verifying with the author, it seems that this describes what he had in mind.</p>
+
+</article>
+
+            </div>
+        </main>
+    </body></html>
